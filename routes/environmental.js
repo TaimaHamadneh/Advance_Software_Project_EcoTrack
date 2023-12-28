@@ -4,10 +4,7 @@ const asyncHandler = require("express-async-handler");
 const {User,validateupdate}= require("../models/User");
 const {EnvironmentalData,validatecreateEnvironmentalData,validateupdateEnvironmentalData} =require("../models/EnvironmentalData");
 const {verifyTokenAndAdmin} =require("../middlewares/verifyToken");
-
-
-
-
+const {sendThresholdEmail} = require("../models/Sendemail");
 
 
 
@@ -79,8 +76,8 @@ asyncHandler(
              
              
 
-              // Check if the environmental data exceeds user thresholds
-              const users = await User.find({ location: req.body.location, threshold: { $lt: req.body.temperature } });
+    // Check if the environmental data exceeds user thresholds
+    const users = await User.find({ location: req.body.location, threshold: { $lt: req.body.temperature } });
              
 
 
@@ -91,9 +88,11 @@ asyncHandler(
         }
 
         user.notifications.push({
-            message: `The temperature threshold at ${req.body.location} is now greater than your configured threshold.`,
+            message: The temperature threshold at ${req.body.location} is now greater than your configured threshold.,
+            
             timestamp: new Date(),
         });
+        sendThresholdEmail(user.email, req.body.location);
 
         await user.save();
     });
@@ -136,10 +135,38 @@ asyncHandler (
         },
         {new:true}
         );
-        res.status(200).json(environmentals);
+       // res.status(200).json(environmentals)
+       const result =await environmentals.save();
+
+        //here
+         // Check if the environmental data exceeds user thresholds
+    const users = await User.find({ location: req.body.location, threshold: { $lt: req.body.temperature } });
+             
+
+
+    // Update user schema with notifications
+    users.forEach(async (user) => {
+        if (!user.notifications) {
+            user.notifications = [];
+        }
+
+        user.notifications.push({
+            message: The temperature threshold at ${req.body.location} is now greater than your configured threshold.,
+            
+            timestamp: new Date(),
+        });
+        sendThresholdEmail(user.email, req.body.location);
+
+        await user.save();
+    });
+            
+              
+              res.status(201).json(result);//201 means created successfully
+            }       
+
   
     
-     }
+     
 ));
 
 
