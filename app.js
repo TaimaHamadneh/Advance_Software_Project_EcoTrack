@@ -4,6 +4,7 @@ const logger = require("./middlewares/logger")
 const {notfound,errorHandler} = require("./middlewares/errors")
 require("dotenv").config();
 const connectToDB = require("./config/db");
+const nodemailer = require("nodemailer");
 
 
 
@@ -33,6 +34,8 @@ app.use("/api/auth",require("./routes/auth"));
 app.use("/api/users",require("./routes/users"));
 app.use("/api/connection",require("./routes/connection"));
 app.use("/api/reports",require("./routes/reports"));
+app.use("/api/externalapi",require("./routes/externalapi"));
+
 
 
 
